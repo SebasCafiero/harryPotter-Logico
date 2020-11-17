@@ -8,46 +8,73 @@ sangre(harry, mestiza).
 sangre(draco, pura).
 sangre(hermione, impura).
 
-caracteristicas(harry, [coraje, amistad, orgullo, inteligencia]). % VER DE SEPARAR CARACTERISTICAS NO EN LISTAS
-caracteristicas(draco, [inteligencia, orgullo]).
-caracteristicas(hermione, [inteligencia, orgullo, responsabilidad]).
+tieneCaracteristica(harry, coraje).
+tieneCaracteristica(harry, amistad).
+tieneCaracteristica(harry, orgullo).
+tieneCaracteristica(harry, inteligencia).
+tieneCaracteristica(draco, inteligencia).
+tieneCaracteristica(draco, orgullo).
+tieneCaracteristica(hermione, inteligencia).
+tieneCaracteristica(hermione, orgullo).
+tieneCaracteristica(hermione, responsabilidad).
 
-esCaracteristica(Alguien, Caracteristica):-
-    caracteristicas(Alguien, ListaDeCaracteristicas),
-    member(Caracteristica, ListaDeCaracteristicas).
-
-casaOdiada(harry, slytherin).
+casaOdiada(harry, slytherin). % REALIZAR DE OTRA FORMA
 casaOdiada(draco, hufflepuff).
 
+caracteristicaContemplada(gryffindor, coraje).
+caracteristicaContemplada(slytherin, orgullo).
+caracteristicaContemplada(slytherin, inteligencia).
+caracteristicaContemplada(ravenclaw, inteligencia).
+caracteristicaContemplada(ravenclaw, responsabilidad).
+caracteristicaContemplada(hufflepuff, amistad).
 
-sombrero(gryffindor, Alumno):- esCaracteristica(Alumno, coraje).
+casa(gryffindor).
+casa(slytherin).
+casa(ravenclaw).
+casa(hufflepuff).
 
-sombrero(slytherin, Alumno):-
-    esCaracteristica(Alumno, orgullo),
-    esCaracteristica(Alumno, inteligencia).
-
-sombrero(ravenclaw, Alumno):-
-    esCaracteristica(Alumno, inteligencia),
-    esCaracteristica(Alumno, responsabilidad).
-
-sombrero(hufflepuff, Alumno):- esCaracteristica(Alumno, amistad).
-
-
-casaPermite(gryffindor, Alumno):- sombrero(gryffindor, Alumno).
-casaPermite(ravenclaw, Alumno):- sombrero(ravenclaw, Alumno).
-casaPermite(hufflepuff, Alumno):- sombrero(hufflepuff, Alumno).
-
-casaPermite(slytherin, Alumno):- 
-    sombrero(slytherin, Alumno),
-    not(sangre(Alumno, impura)).
-
-magoCaracterApropiado(Casa, Alumno):- sombrero(Casa, Alumno).
+mago(Alguien):- sangre(Alguien, _).
 
 
+% 1.
+casaPermiteEntrar(slytherin, Alumno):-
+    mago(Alumno),
+    sangre(Alumno, Sangre),
+    Sangre \= impura.
+/*
+casaPermiteEntrar(slytherin, Alumno):- sangre(Alumno, pura).
+casaPermiteEntrar(slytherin, Alumno):- sangre(Alumno, mestiza).
+*/
+
+casaPermiteEntrar(Casa, Alumno):-
+    casa(Casa),
+    mago(Alumno),
+    Casa \= slytherin.
+/*
+casaPermiteEntrar(gryffindor, Alumno).
+casaPermiteEntrar(ravenclaw, Alumno).
+casaPermiteEntrar(hufflepuff, Alumno).
+*/
+
+
+% 2.
+magoCaracterApropiado(Casa, Alumno):-
+    casa(Casa),
+    mago(Alumno),
+    forall(caracteristicaContemplada(Casa, Caracteristica),
+            tieneCaracteristica(Alumno, Caracteristica)).
+
+
+% 3.
 magoPuedeQuedarEnCasa(gryffindor, hermione).
 magoPuedeQuedarEnCasa(Casa, Alumno):-
-    casaPermite(Casa, Alumno),
+    casa(Casa),
+    mago(Alumno),
+    magoCaracterApropiado(Casa, Alumno),
+    casaPermiteEntrar(Casa, Alumno),
     not(casaOdiada(Alumno, Casa)).
 
+
+% 4. FALTA REVISAR BIEN
 cadenaDeAmistades(ListaDeMagos):-
-    forall(member(Mago, ListaDeMAgos), esCaracteristica(Mago, amistad)). %Falta que vayan a la misma casa.
+    forall(member(Mago, ListaDeMAgos), tieneCaracteristica(Mago, amistad)). %Falta que vayan a la misma casa.
